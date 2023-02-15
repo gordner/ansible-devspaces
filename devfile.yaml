@@ -6,6 +6,10 @@ projects:
   git:
     remotes:
       origin: https://github.com/gordner/demo.git
+- name: devfile details
+  git:
+    remotes:
+      origin: https://github.com/gordner/
 components:
   - name: tools
     container:
