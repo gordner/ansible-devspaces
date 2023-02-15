@@ -6,10 +6,10 @@ projects:
   git:
     remotes:
       origin: https://github.com/gordner/demo.git
-- name: devfile details
+- name: devfile-details
   git:
     remotes:
-      origin: https://github.com/gordner/
+      origin: https://github.com/gordner/ansible-devspaces.git
 components:
   - name: tools
     container:
