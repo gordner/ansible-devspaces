@@ -1,20 +1,20 @@
 # syntax=docker/dockerfile:1.3-labs
 
 # https://registry.access.redhat.com/ubi8/ubi
-FROM registry.access.redhat.com/ubi8/ubi:8.7-1054.1675788412
-LABEL maintainer="Red Hat, Inc."
+FROM registry.redhat.io/ansible-automation-platform-23/ee-minimal-rhel8:1.0.0-260
+LABEL maintainer="Louis Gordner"
 
-LABEL com.redhat.component="devfile-base-container"
-LABEL name="devfile/base-developer-image"
+LABEL com.redhat.component="ansible-devfile-base-container"
+LABEL name="lgordner/ansible-demo"
 LABEL version="ubi8"
 
 #label for EULA
 LABEL com.redhat.license_terms="https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI"
 
 #labels for container catalog
-LABEL summary="devfile base developer image"
-LABEL description="Image with base developers tools. Languages SDK and runtimes excluded."
-LABEL io.k8s.display-name="devfile-developer-base"
+LABEL summary="ansible devfile base developer image"
+LABEL description="Image with ansible developers tools. Languages SDK and runtimes excluded."
+LABEL io.k8s.display-name="ansible-devfile-developer-base"
 LABEL io.openshift.expose-services=""
 
 USER 0
