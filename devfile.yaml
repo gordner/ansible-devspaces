@@ -3,9 +3,9 @@ metadata:
   name: Ansible-DevSpaces-Demo
 projects:
 - name: sample
-  source:
-    type: git
-    location: https://github.com/gordner/demo.git
+  git:
+    remotes:
+      origin: https://github.com/gordner/demo.git
 components:
   - name: tools
     container:
