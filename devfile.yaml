@@ -2,14 +2,15 @@ schemaVersion: 2.1.0
 metadata:
   name: Ansible-DevSpaces-Demo
 projects:
-- name: sample
-  git:
-    remotes:
-      origin: https://github.com/gordner/demo.git
 - name: devfile-details
   git:
     remotes:
       origin: https://github.com/gordner/ansible-devspaces.git
+- name: sample
+  git:
+    remotes:
+      origin: https://github.com/gordner/demo.git
+
 components:
   - name: tools
     container:
