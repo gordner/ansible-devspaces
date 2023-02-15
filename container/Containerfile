@@ -23,6 +23,12 @@ RUN microdnf install -y bash curl diffutils git git-lfs iproute jq less lsof man
                    perl-Digest-SHA net-tools openssh-clients rsync socat sudo time vim wget zip && \
                    microdnf clean all
 
+RUN pip3 install ansible-navigator==2.2.0
+
+# ADD ansible-navigator-2.2.0-1.el8ap.noarch.rpm ansible-builder-1.2.0-1.el8ap.noarch.rpm python39-onigurumacffi-1.1.0-2.el8ap.x86_64.rpm /root/
+# RUN microdnf install -y podman && \
+#     rpm -Uvh /root/python39-onigurumacffi-1.1.0-2.el8ap.x86_64.rpm /root/ansible-builder-1.2.0-1.el8ap.noarch.rpm /root/ansible-navigator-2.2.0-1.el8ap.noarch.rpm
+
 # ## gh-cli
 # RUN \
 #     TEMP_DIR="$(mktemp -d)"; \
