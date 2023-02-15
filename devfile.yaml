@@ -4,7 +4,7 @@ metadata:
 components:
   - name: tools
     container:
-      image: quay.io/devfile/universal-developer-image:ubi8-0e189d9
+      image: quay.io/lgordner/ansible-demo:0.0.1
       volumeMounts:
         - name: venv
           path: /home/user/.venv
