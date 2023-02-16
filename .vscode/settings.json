@@ -1,4 +1,7 @@
 {
+    "git.confirmSync": false,
+    "git.autofetch": true,
+    "redhat.telemetry.enabled": true,
     "files.trimTrailingWhitespace": true,
     "git.postCommitCommand": "push",
     "files.associations": {
