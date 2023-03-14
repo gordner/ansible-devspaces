@@ -1,0 +1,17 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStreamImport
+metadata:
+  name: ee-minimal-rhel8
+  namespace: lgordner-dev
+spec:
+  import: true
+  images:
+  - from:
+      kind: DockerImage
+      name: registry.redhat.io/ansible-automation-platform-23/ee-minimal-rhel8
+    to:
+      name: latest
+    referencePolicy:
+      type: Source
+    importPolicy:
+      importMode: "PreserveOriginal"

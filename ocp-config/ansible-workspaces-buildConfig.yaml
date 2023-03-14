@@ -1,0 +1,104 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: ansible-workspaces-image-build
+  namespace: lgordner-dev
+  uid: 2beb0276-642c-4d6a-be94-481d95ec3c20
+  resourceVersion: '2183664988'
+  generation: 13
+  creationTimestamp: '2023-03-10T15:34:23Z'
+  labels:
+    name: docker-build
+  managedFields:
+    - manager: Mozilla
+      operation: Update
+      apiVersion: build.openshift.io/v1
+      time: '2023-03-11T03:25:09Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:metadata':
+          'f:labels':
+            .: {}
+            'f:name': {}
+        'f:spec':
+          'f:failedBuildsHistoryLimit': {}
+          'f:output':
+            'f:pushSecret': {}
+            'f:to': {}
+          'f:runPolicy': {}
+          'f:source':
+            'f:contextDir': {}
+            'f:git':
+              .: {}
+              'f:uri': {}
+            'f:type': {}
+          'f:strategy':
+            'f:dockerStrategy':
+              .: {}
+              'f:dockerfilePath': {}
+              'f:env': {}
+              'f:from': {}
+            'f:type': {}
+          'f:successfulBuildsHistoryLimit': {}
+          'f:triggers': {}
+    - manager: openshift-apiserver
+      operation: Update
+      apiVersion: build.openshift.io/v1
+      time: '2023-03-11T03:25:14Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:status':
+          'f:lastVersion': {}
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: DockerImage
+      name: 'quay.io/lgordner/ansible-demo:latest'
+    pushSecret:
+      name: lrg-quay
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy:
+      from:
+        kind: DockerImage
+        name: 'quay.io/lgordner/lrg-ee:latest'
+      env:
+        - name: ANSIBLE_GALAXY_SERVER_LIST
+          value: 'console, galaxy'
+        - name: ANSIBLE_GALAXY_SERVER_CONSOLE_URL
+          valueFrom:
+            secretKeyRef:
+              name: lrg-galaxy
+              key: console-url
+        - name: ANSIBLE_GALAXY_SERVER_CONSOLE_AUTH_URL
+          value: >-
+            https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+        - name: ANSIBLE_GALAXY_SERVER_CONSOLE_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: lrg-galaxy
+              key: console-token
+        - name: ANSIBLE_GALAXY_SERVER_GALAXY_URL
+          value: 'https://galaxy.ansible.com'
+      dockerfilePath: Containerfile
+  postCommit: {}
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/gordner/ansible-devspaces.git'
+    contextDir: devspace-container
+  triggers:
+    - type: ConfigChange
+    - type: GitHub
+      github:
+        secret: lrg-github
+    - type: Generic
+      generic:
+        secret: redhat-repo
+  runPolicy: Serial
+status:
+  lastVersion: 12
