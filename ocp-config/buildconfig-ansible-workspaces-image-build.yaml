@@ -1,11 +1,11 @@
-kind: BuildConfig
+﻿kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
   name: ansible-workspaces-image-build
   namespace: lgordner-dev
   uid: 2beb0276-642c-4d6a-be94-481d95ec3c20
-  resourceVersion: '2183664988'
-  generation: 13
+  resourceVersion: '2186631776'
+  generation: 19
   creationTimestamp: '2023-03-10T15:34:23Z'
   labels:
     name: docker-build
@@ -13,7 +13,7 @@ metadata:
     - manager: Mozilla
       operation: Update
       apiVersion: build.openshift.io/v1
-      time: '2023-03-11T03:25:09Z'
+      time: '2023-03-11T20:05:54Z'
       fieldsType: FieldsV1
       fieldsV1:
         'f:metadata':
@@ -44,10 +44,11 @@ metadata:
     - manager: openshift-apiserver
       operation: Update
       apiVersion: build.openshift.io/v1
-      time: '2023-03-11T03:25:14Z'
+      time: '2023-03-11T20:05:54Z'
       fieldsType: FieldsV1
       fieldsV1:
         'f:status':
+          'f:imageChangeTriggers': {}
           'f:lastVersion': {}
 spec:
   nodeSelector: null
@@ -64,8 +65,8 @@ spec:
     type: Docker
     dockerStrategy:
       from:
-        kind: DockerImage
-        name: 'quay.io/lgordner/lrg-ee:latest'
+        kind: ImageStreamTag
+        name: 'lrg-ee:latest'
       env:
         - name: ANSIBLE_GALAXY_SERVER_LIST
           value: 'console, galaxy'
@@ -93,6 +94,8 @@ spec:
     contextDir: devspace-container
   triggers:
     - type: ConfigChange
+    - type: ImageChange
+      imageChange: {}
     - type: GitHub
       github:
         secret: lrg-github
@@ -101,4 +104,10 @@ spec:
         secret: redhat-repo
   runPolicy: Serial
 status:
-  lastVersion: 12
+  lastVersion: 14
+  imageChangeTriggers:
+    - lastTriggeredImageID: >-
+        quay.io/lgordner/lrg-ee@sha256:1eb40bfed086fd65209f625e793e00009beaada101d8d56bb05bff0b0a849959
+      from:
+        name: 'lrg-ee:latest'
+      lastTriggerTime: '2023-03-11T20:05:54Z'
