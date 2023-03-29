@@ -1,0 +1,32 @@
+---
+ansible-navigator:
+  ansible-runner:
+  #   artifact-dir: 
+  #   rotate-artifacts-count: 
+  execution-environment:
+    image:
+    # volume-mounts: 
+    pull:
+      policy: missing
+    # environment-variables:
+      # pass: 
+      # set:
+  ansible:
+    # cmdline: 
+    inventory:
+    ## Can be a comma separated list or a file/dir
+      # entries: 
+  ansible-lint:
+    config: .config/ansible-lint.yml
+  logging:
+    append: true
+    file: ./ansible-navigator.log
+    level: info
+  mode: stdout
+  playbook-artifact:
+    enable: true
+    ## default: {playbook_dir}/{playbook_name}-artifact-{time_stamp}.json
+    # save-as: 
+
+ 
+
