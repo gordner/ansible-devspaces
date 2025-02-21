@@ -19,7 +19,7 @@ LABEL io.openshift.expose-services=""
 
 USER 0
 
-RUN microdnf install -y bash curl diffutils git git-lfs iproute jq less lsof man nano procps \
+RUN microdnf install -y bash diffutils git git-lfs iproute jq less lsof man nano procps \
                    perl-Digest-SHA net-tools openssh-clients rsync socat sudo time vim wget zip && \
                    microdnf clean all
 
