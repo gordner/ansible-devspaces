@@ -23,7 +23,7 @@ RUN microdnf install -y bash diffutils git git-lfs iproute jq less lsof man nano
                    perl-Digest-SHA net-tools openssh-clients rsync socat sudo time vim wget zip && \
                    microdnf clean all
 
-RUN pip3 install ansible-navigator==2.2.0
+RUN pip3 install ansible-navigator[ansible-core]
 
 ## gh-cli
 RUN \
