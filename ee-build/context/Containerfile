@@ -1,5 +1,5 @@
-ARG EE_BASE_IMAGE=registry.redhat.io/ansible-automation-platform-23/ee-minimal-rhel8:latest
-ARG EE_BUILDER_IMAGE=registry.redhat.io/ansible-automation-platform-23/ansible-builder-rhel8:latest
+ARG EE_BASE_IMAGE=registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel8:latest
+ARG EE_BUILDER_IMAGE=registry.redhat.io/ansible-automation-platform-25/ansible-builder-rhel8:latest
 
 FROM $EE_BASE_IMAGE as galaxy
 ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS=--pre

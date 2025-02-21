@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.3-labs
 
 # https://registry.access.redhat.com/ubi8/ubi
-FROM registry.redhat.io/ansible-automation-platform-23/ee-minimal-rhel8:1.0.0-260
+FROM registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel9:1.0.0-824
 LABEL maintainer="Louis Gordner"
 
 LABEL com.redhat.component="ansible-devfile-base-container"
