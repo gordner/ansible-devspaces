@@ -14,7 +14,7 @@ projects:
 components:
   - name: tools
     container:
-      image: quay.io/lgordner/ansible-demo:0.0.2
+      image: quay.io/lgordner/ansible-demo:0.0.3
       volumeMounts:
         - name: venv
           path: /home/user/.venv

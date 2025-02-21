@@ -1,10 +1,8 @@
 ---
 ansible-navigator:
-  ansible-runner:
   #   artifact-dir: 
   #   rotate-artifacts-count: 
   execution-environment:
-    image:
     # volume-mounts: 
     pull:
       policy: missing
