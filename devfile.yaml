@@ -9,7 +9,7 @@ projects: []
 components:
   - name: tools
     container:
-      image: registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel9:latest
+      image: quay.io/lgordner/ansible-devtools-devspace:latest
       memoryLimit: 3Gi
       cpuLimit: "2"
       mountSources: true
@@ -217,5 +217,4 @@ events:
     - install-code-cli
     - verify-ansible-2-16-14
     - galaxy-install-collections
-    - install-ansible-devtools
     - write-inrepo-configs
