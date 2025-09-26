@@ -113,29 +113,6 @@ commands:
         kind: build
 
   ##########################################################################
-  # 3) Install dev tools: ansible-dev-tools, ansible-lint, ansible-navigator
-  #    (user-level pip install; no root required)
-  ##########################################################################
-  - id: install-ansible-devtools
-    exec:
-      component: tools
-      label: "Install ansible-dev-tools, ansible-lint, ansible-navigator"
-      workingDir: /projects
-      commandLine: |
-        set -euo pipefail
-        python3 -m pip install --user --upgrade pip
-        # ansible-dev-tools bundles useful CLIs (incl. ansible-lint wrapper)
-        python3 -m pip install --user 'ansible-dev-tools>=24.8.0'
-        # install/upgrade these explicitly as well
-        python3 -m pip install --user 'ansible-lint>=24.7.0' 'ansible-navigator>=24.6.0'
-        which ansible-lint || true
-        which ansible-navigator || true
-        ansible-lint --version || true
-        ansible-navigator --version || true
-      group:
-        kind: build
-
-  ##########################################################################
   # 4) Drop opinionated configs for in-container use on OCP
   ##########################################################################
   - id: write-inrepo-configs
