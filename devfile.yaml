@@ -1,36 +1,244 @@
-schemaVersion: 2.1.0
+schemaVersion: 2.2.0
 metadata:
-  name: Ansible-DevSpaces-Demo
-projects:
-- name: devfile-details
-  git:
-    remotes:
-      origin: https://github.com/gordner/ansible-devspaces.git
-# - name: sample
-#   git:
-#     remotes:
-#       origin: https://github.com/gordner/demo.git
+  name: aap25-ee-vscode-tunnel-devtools
+attributes:
+  controller.devfile.io/storage-type: per-workspace
+
+projects: []
 
 components:
   - name: tools
     container:
-      image: quay.io/lgordner/ansible-demo:0.0.3
-      volumeMounts:
-        - name: venv
-          path: /home/user/.venv
-      memoryLimit: 512Mi
+      image: registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel9:latest
+      memoryLimit: 3Gi
+      cpuLimit: "2"
       mountSources: true
+      command: ["/bin/bash", "-lc"]
+      args: ["sleep infinity"]
+      env:
+        - name: DEVWORKSPACE_NAME
+          value: devspaces-workspace
+        # Ensure user-installed CLIs are on PATH
+        - name: PATH
+          value: /home/user/.local/bin:$PATH
+        - name: ANSIBLE_STDOUT_CALLBACK
+          value: yaml
+        # Navigator defaults to running *inside this container* (no podman/docker)
+        - name: ANSIBLE_NAVIGATOR_CONFIG
+          value: /projects/ansible-navigator.yml
+      volumeMounts:
+        - name: vscache
+          path: /home/user/.cache
+        - name: vscode
+          path: /home/user/.vscode
+        - name: pipcache
+          path: /home/user/.cache/pip
 
-  - name: venv
+  - name: vscache
     volume:
-      size: 1G
+      size: 1Gi
+  - name: vscode
+    volume:
+      size: 1Gi
+  - name: pipcache
+    volume:
+      size: 2Gi
 
-# commands:
-#   - id: run-application
-#     exec:
-#       label: "Run application"
-#       component: tools
-#       workingDir: ${PROJECT_SOURCE}
-#       commandLine: "python3 hello-world.py"
-#       group:
-#         kind: run
+commands:
+  ##########################################################################
+  # 0) VS Code CLI for Remote Tunnels
+  ##########################################################################
+  - id: install-code-cli
+    exec:
+      component: tools
+      label: "Install VS Code CLI (one-time)"
+      workingDir: $HOME
+      commandLine: |
+        set -euo pipefail
+        mkdir -p "$HOME/checode"
+        if [ ! -x "$HOME/checode/code" ]; then
+          curl -fsSL 'https://code.visualstudio.com/sha/download?build=stable&os=cli-alpine-x64' -o /tmp/code-cli.tar.gz
+          tar -xzf /tmp/code-cli.tar.gz -C "$HOME/checode"
+          rm -f /tmp/code-cli.tar.gz
+        fi
+        "$HOME/checode/code" --version
+      group:
+        kind: build
+        isDefault: true
+
+  ##########################################################################
+  # 1) Verify Ansible version (expect 2.16.14 in this EE tag)
+  ##########################################################################
+  - id: verify-ansible-2-16-14
+    exec:
+      component: tools
+      label: "Verify Ansible version (expect 2.16.14)"
+      workingDir: /projects
+      commandLine: |
+        set -euo pipefail
+        ansible --version || true
+        core_ver="$(ansible --version 2>/dev/null | awk '/ansible\\score/ {print $3}')"
+        if [ "${core_ver:-unknown}" != "2.16.14" ]; then
+          echo "WARNING: ansible-core is '${core_ver:-unknown}', expected '2.16.14'."
+        else
+          echo "OK: ansible-core == 2.16.14"
+        fi
+      group:
+        kind: test
+        isDefault: true
+
+  ##########################################################################
+  # 2) Install Galaxy collections from collections/requirements.(yml|yaml)
+  ##########################################################################
+  - id: galaxy-install-collections
+    exec:
+      component: tools
+      label: "ansible-galaxy collection install (collections/requirements.yml)"
+      workingDir: /projects
+      commandLine: |
+        set -euo pipefail
+        req=""
+        if [ -f collections/requirements.yml ]; then
+          req="collections/requirements.yml"
+        elif [ -f collections/requirements.yaml ]; then
+          req="collections/requirements.yaml"
+        fi
+        if [ -n "$req" ]; then
+          mkdir -p collections
+          ansible-galaxy collection install -r "$req" -p ./collections
+        else
+          echo "No collections/requirements.yml found; skipping."
+        fi
+      group:
+        kind: build
+
+  ##########################################################################
+  # 3) Install dev tools: ansible-dev-tools, ansible-lint, ansible-navigator
+  #    (user-level pip install; no root required)
+  ##########################################################################
+  - id: install-ansible-devtools
+    exec:
+      component: tools
+      label: "Install ansible-dev-tools, ansible-lint, ansible-navigator"
+      workingDir: /projects
+      commandLine: |
+        set -euo pipefail
+        python3 -m pip install --user --upgrade pip
+        # ansible-dev-tools bundles useful CLIs (incl. ansible-lint wrapper)
+        python3 -m pip install --user 'ansible-dev-tools>=24.8.0'
+        # install/upgrade these explicitly as well
+        python3 -m pip install --user 'ansible-lint>=24.7.0' 'ansible-navigator>=24.6.0'
+        which ansible-lint || true
+        which ansible-navigator || true
+        ansible-lint --version || true
+        ansible-navigator --version || true
+      group:
+        kind: build
+
+  ##########################################################################
+  # 4) Drop opinionated configs for in-container use on OCP
+  ##########################################################################
+  - id: write-inrepo-configs
+    exec:
+      component: tools
+      label: "Write configs: ansible.cfg, ansible-navigator.yml, .ansible-lint"
+      workingDir: /projects
+      commandLine: |
+        set -euo pipefail
+
+        # ansible.cfg — prefer repo collections/ and colored stdout
+        cat > ansible.cfg <<'EOF'
+        [defaults]
+        callbacks_enabled = default, profile_tasks
+        stdout_callback = yaml
+        display_skipped_hosts = false
+        nocows = true
+        # Keep project-local collections preferred
+        collections_paths = ./collections:~/.ansible/collections:/usr/share/ansible/collections
+        roles_path = ./roles:~/.ansible/roles:/usr/share/ansible/roles
+        EOF
+
+        # ansible-navigator.yml — run *inside this container*, no external runtime
+        cat > ansible-navigator.yml <<'EOF'
+        ansible-navigator:
+          mode: stdout
+          execution-environment:
+            enabled: false          # We are already inside the EE container on OCP
+          playbook-artifact:
+            enable: true
+            save-as: .artifacts/{playbook}_{ts}.json
+          logging:
+            level: warning
+          editor:
+            command: vi
+            console: true
+        EOF
+
+        # ansible-lint config — basic, project-friendly defaults
+        cat > .ansible-lint <<'EOF'
+        profiles:
+          - production
+        parseable: true
+        strict: false
+        # Respect repo-local collections and roles
+        config_file: ansible.cfg
+        exclude_paths:
+          - .git
+          - .artifacts
+        EOF
+
+        echo "Wrote ansible.cfg, ansible-navigator.yml, .ansible-lint"
+      group:
+        kind: build
+
+  ##########################################################################
+  # 5) Convenience runners
+  ##########################################################################
+  - id: lint-project
+    exec:
+      component: tools
+      label: "ansible-lint (project root)"
+      workingDir: /projects
+      commandLine: |
+        set -euo pipefail
+        ansible-lint .
+      group:
+        kind: test
+
+  - id: run-playbook-navigator
+    exec:
+      component: tools
+      label: "ansible-navigator run site.yml (stdout)"
+      workingDir: /projects
+      commandLine: |
+        set -euo pipefail
+        if [ ! -f site.yml ] && [ ! -f site.yaml ]; then
+          echo "No site.yml found; change the command or add a playbook."
+          exit 1
+        fi
+        pb="site.yml"; [ -f site.yaml ] && pb="site.yaml"
+        ansible-navigator run "$pb" -m stdout
+      group:
+        kind: run
+
+  ##########################################################################
+  # 6) Start VS Code Remote Tunnel
+  ##########################################################################
+  - id: start-vscode-tunnel
+    exec:
+      component: tools
+      label: "Start VS Code Remote Tunnel (interactive)"
+      workingDir: $HOME
+      commandLine: |
+        "$HOME/checode/code" tunnel --accept-server-license-terms --name "${DEVWORKSPACE_NAME}"
+      group:
+        kind: run
+        isDefault: true
+
+events:
+  postStart:
+    - install-code-cli
+    - verify-ansible-2-16-14
+    - galaxy-install-collections
+    - install-ansible-devtools
+    - write-inrepo-configs
