@@ -20,7 +20,7 @@ components:
           value: devspaces-workspace
         # Ensure user-installed CLIs are on PATH
         - name: PATH
-          value: /home/user/.local/bin:$PATH
+          value: /home/user/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
         - name: ANSIBLE_STDOUT_CALLBACK
           value: yaml
         # Navigator defaults to running *inside this container* (no podman/docker)
@@ -212,8 +212,8 @@ commands:
         kind: run
         isDefault: true
 
-events:
-  postStart:
+# events:
+#   postStart:
     # - install-code-cli
     # # - verify-ansible-2-16-14
     # - galaxy-install-collections
