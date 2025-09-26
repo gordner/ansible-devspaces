@@ -214,8 +214,8 @@ commands:
 
 events:
   postStart:
-    - install-code-cli
-    # - verify-ansible-2-16-14
-    - galaxy-install-collections
-    - start-vscode-tunnel
+    # - install-code-cli
+    # # - verify-ansible-2-16-14
+    # - galaxy-install-collections
+    # - start-vscode-tunnel
     # - write-inrepo-configs
